@@ -6,8 +6,8 @@ go:
     - tip
 
 install:
-    - go get github.com/bmizerany/assert
-	- go get labix.org/v2/mgo
+    - go get github.com/cojac/assert
+    - go get labix.org/v2/mgo
 
 services:
     - mongodb
