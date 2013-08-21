@@ -1,0 +1,24 @@
+{
+    "timestamp": "2013-08-13T05:43:03.32344",
+    "action": "update",
+    "script": {
+        "uri": "https://github.com/cbmi/project/blob/master/parse-users.py",
+        "version": "a32f87cb"
+    },
+    "source": {
+        "type": "delimited",
+        "delimiter": ",",
+        "uri": "148.29.12.100/path/to/users.csv",
+        "name": "users.csv",
+        "line": 5,
+        "column": 4
+    },
+    "target": {
+        "type": "relational",
+        "uri": "148.29.12.101:5236",
+        "database": "socialapp",
+        "table": "users",
+        "row": { "id": 38 },
+        "column": "email"
+    }
+}
