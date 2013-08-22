@@ -65,3 +65,12 @@ Content-Type: application/json
     }
 }
 ```
+
+---
+
+## Ideas / Questions
+
+- Normalization of sources, targets, and scripts to normalize into separate collections
+    - `_id` generation for sources, targets and scripts for normalizing into separate collections
+    - This would reduce a lot redundancy for row/line/column-level logging
+    - Flag for whether to keep the original document in place rather than replacing it with the `_id`
