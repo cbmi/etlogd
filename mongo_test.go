@@ -1,64 +1,65 @@
 package main
 
 import (
+	"github.com/bruth/assert"
 	"github.com/cbmi/etlog/encoding"
-	"github.com/cojac/assert"
-	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 	"testing"
 )
 
-type Message struct {
-	Extra map[string]interface{} `json:"-" bson:",inline"`
+var jsonString = `
+{
+    "timestamp": "2013-08-13T05:43:03.32344",
+    "action": "update",
+    "script": {
+        "uri": "https://github.com/cbmi/project/blob/master/parse-users.py",
+        "version": "a32f87cb"
+    },
+    "source": {
+        "type": "delimited",
+        "delimiter": ",",
+        "uri": "148.29.12.100/path/to/users.csv",
+        "name": "users.csv",
+        "line": 5,
+        "column": 4
+    },
+    "target": {
+        "type": "relational",
+        "uri": "148.29.12.101:5236",
+        "database": "socialapp",
+        "table": "users",
+        "row": { "id": 38 },
+        "column": "email"
+    }
 }
+`
 
 func TestInsertDoc(t *testing.T) {
-	d := Message{}
+	cfg := NewConfigWithArgs()
+	defer cfg.Mongo.session.Close()
 
-	mongoHost := "0.0.0.0:27017"
+	var d, r bson.M
 
-	s, _ := mgo.Dial(mongoHost)
-	defer s.Close()
+	// Drop the test database by default
+	db := DB(cfg)
+	db.DropDatabase()
 
-	// Insert the data into the collection
-	c := s.DB("etlog").C("logs")
-    c.RemoveId(1)
+	col := C(cfg)
 
-	encoding.UnmarshalJSON([]byte(`
-        {
-            "_id": 1,
-            "timestamp": "2013-08-13T05:43:03.32344",
-            "action": "update",
-            "script": {
-                "uri": "https://github.com/cbmi/project/blob/master/parse-users.py",
-                "version": "a32f87cb"
-            },
-            "source": {
-                "type": "delimited",
-                "delimiter": ",",
-                "uri": "148.29.12.100/path/to/users.csv",
-                "name": "users.csv",
-                "line": 5,
-                "column": 4
-            },
-            "target": {
-                "type": "relational",
-                "uri": "148.29.12.101:5236",
-                "database": "socialapp",
-                "table": "users",
-                "row": { "id": 38 },
-                "column": "email"
-            }
-        }
-    `), &d)
+	// Unmarshal JSON string into document
+	encoding.UnmarshalJSON([]byte(jsonString), &d)
 
-	insertDoc(&d)
+	// Insert then fetch one
+	col.Insert(&d)
+	col.Find(nil).One(&r)
 
-	// Retrieve message
-	var r []Message
-	c.FindId(1).All(&r)
-
-	assert.Equal(t, 1, len(r))
-
-	_, ok := r[0].Extra["source"]
+	// Ensure the _id key has been created
+	v, ok := r["_id"]
 	assert.True(t, ok)
+
+	// This looks odd due to the type assertion. This converts it into
+	// the interface{} value of "source" to a bson.M (another map) so "uri"
+	// can be accessed
+	v, _ = r["source"].(bson.M)["uri"]
+	assert.Equal(t, v, "148.29.12.100/path/to/users.csv")
 }

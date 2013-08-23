@@ -1,24 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
 )
 
-func ServeUdp(host string, port int) {
-	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", host, port))
-	handleError(err)
+func ServeUdp(cfg *Config) {
+	defer cfg.Mongo.session.Close()
+
+	addr, err := net.ResolveUDPAddr("udp", cfg.Server.Host)
+	handleFatal(err)
 
 	conn, err := net.ListenUDP("udp", addr)
-	handleError(err)
-
-	// Close on exit
+	handleFatal(err)
 	defer conn.Close()
 
-	fmt.Printf("Listening on udp://%v...", addr)
+	log.Printf("Listening on udp://%v...\n", addr)
 
 	for {
-		// Handle connection in a goroutine
-		go handleMessage(conn)
+		go handleMessage(cfg, conn)
 	}
 }

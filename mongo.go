@@ -4,18 +4,12 @@ import (
 	"labix.org/v2/mgo"
 )
 
-// Takes an array of bytes containing the JSON data and inserts it
-// into mongo
-func insertDoc(d interface{}) {
-	mongoHost := "0.0.0.0:27017"
+// Convenience function to get a database given a config
+func DB(cfg *Config) *mgo.Database {
+	return cfg.Mongo.session.DB(cfg.Mongo.Database)
+}
 
-	// Connect to mongo, if there is an issue here, we are in trouble
-	s, err := mgo.Dial(mongoHost)
-	defer s.Close()
-	handleError(err)
-
-	// Insert the data into the collection
-	c := s.DB("etlog").C("logs")
-	err = c.Insert(d)
-	handleError(err)
+// Convenience function to get a collection given a config
+func C(cfg *Config) *mgo.Collection {
+	return cfg.Mongo.session.DB(cfg.Mongo.Database).C(cfg.Mongo.Collection)
 }

@@ -1,11 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
-func ServeHttp(host string, port int) {
+func ServeHttp(cfg *Config) {
+	defer cfg.Mongo.session.Close()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Currently only write only server..
 		if r.Method != "POST" {
@@ -27,10 +29,9 @@ func ServeHttp(host string, port int) {
 			return
 		}
 
-		handleMessage(r.Body)
+		handleMessage(cfg, r.Body)
 	})
 
-	addr := fmt.Sprintf("%s:%d", host, port)
-	fmt.Printf("Listening on http://%s...\n", addr)
-	handleError(http.ListenAndServe(addr, nil))
+	log.Printf("Listening on http://%s...\n", cfg.Server.Host)
+	handleFatal(http.ListenAndServe(cfg.Server.Host, nil))
 }

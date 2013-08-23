@@ -17,56 +17,72 @@ Read about the [etlog client tools](https://github.com/cbmi/etlog/) for specific
 ## Install
 
 ```bash
-go get github.com/cbmi/etlogd
-go install github.com/cbmi/etlogd
+% go get github.com/cbmi/etlogd
 ```
 
 ## Setup
 
-Requires a mongodb instance running on the default port (this will be configurable soon).
+Requires a mongodb instance.
 
 ## Usage
 
-The default is an HTTP server which handles POST reqeusts.
+The default is an HTTP server which handles POST requests.
 
 ```bash
-etlogd
-Listening on http://:4000...
+% etlogd
+Listening on http://0.0.0.0:4000...
 ```
 
-The `Content-Type` header is required and the body must be valid JSON, for example:
+### Options
 
-```
-POST HTTP/1.1
-Content-Type: application/json
-
-{
-    "timestamp": "2013-08-13T05:43:03.32344",
-    "action": "update",
-    "script": {
-        "uri": "https://github.com/cbmi/project/blob/master/parse-users.py",
-        "version": "a32f87cb"
-    },
-    "source": {
-        "type": "delimited",
-        "delimiter": ",",
-        "uri": "148.29.12.100/path/to/users.csv",
-        "name": "users.csv",
-        "line": 5,
-        "column": 4
-    },
-    "target": {
-        "type": "relational",
-        "uri": "148.29.12.101:5236",
-        "database": "socialapp",
-        "table": "users",
-        "row": { "id": 38 },
-        "column": "email"
-    }
-}
+```bash
+% etlogd -help
+Usage of etlogd:
+  -collection="": mongo collection name
+  -config="": path to ini-style config file
+  -database="": mongo database name
+  -host="": server host
+  -mongo="": mongo host
+  -type="": server type [http (default), tcp, udp]
+  -verbose=false: verbose output
 ```
 
----
+#### INI Format
+
+```dosini
+[general]
+verbose = true
+
+[server]
+type = http
+host = 0.0.0.0:6201
+
+[mongo]
+host = 0.0.0.0:27017,0.0.0.0:27018,0.0.0.0:27019
+```
+
+Command line arguments take precedence over config file. For example, given the above config:
+
+```bash
+% etlogd -config etlogd.ini -database project1
+```
+
+the `project1` database will be used rather than the default (i.e. `etlog`).
+
+## Issues
+
+- The `http` server is the only server that currently works
+
+## Notes
+
+- The `http` server requires a `Content-Type` header of `application/json` and the body must be valid JSON
+
+## TODOs
+
+- Define and document message boundaries for TCP and UDP streams
+- Implement the parsing for TCP and UDP streams
+- Improve usage text for options
+    - Show the defaults for each option
 
 ## Ideas / Questions
 
@@ -74,3 +90,4 @@ Content-Type: application/json
     - `_id` generation for sources, targets and scripts for normalizing into separate collections
     - This would reduce a lot redundancy for row/line/column-level logging
     - Flag for whether to keep the original document in place rather than replacing it with the `_id`
+
