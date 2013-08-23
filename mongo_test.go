@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/bruth/assert"
-	"github.com/cbmi/etlog/encoding"
 	"labix.org/v2/mgo/bson"
 	"testing"
 )
@@ -47,7 +46,7 @@ func TestInsertDoc(t *testing.T) {
 	col := C(cfg)
 
 	// Unmarshal JSON string into document
-	encoding.UnmarshalJSON([]byte(jsonString), &d)
+	unmarshalJSON([]byte(jsonString), &d)
 
 	// Insert then fetch one
 	col.Insert(&d)
