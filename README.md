@@ -1,5 +1,7 @@
 # etlogd
 
+[![Build Status](https://travis-ci.org/cbmi/etlogd.png?branch=master)](https://travis-ci.org/cbmi/etlogd) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cbmi/etlogd/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 etlogd is service for logging metadata during an ETL process. One of the challenges with complex ETL is keeping track of **where data comes from**, **how it was processed**, and **when it populated**. etlog messages contain information about the the _source_ and _target_ data as well as the _script_ that performed the ETL.
 
 The intended outcomes of etlogd is to enable:
